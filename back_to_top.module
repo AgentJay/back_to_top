@@ -15,6 +15,7 @@ function back_to_top_menu() {
   $items['admin/config/user-interface/back_to_top'] = array(
     'title' => 'Back To Top',
     'description' => 'Administer Back To Top settings',
+	  'route_name' => 'back_to_top_settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('back_to_top_settings'),
     'access arguments' => array('access back_to_top settings'),
@@ -29,93 +30,139 @@ function back_to_top_menu() {
  * Implementation of hook_page_build
  * Add javascript & css but first check if prevent on mobile
  */
-function back_to_top_page_build() {
-  $settings = array(
-    'back_to_top_prevent_on_mobile' => variable_get('back_to_top_prevent_on_mobile', TRUE),
-    'back_to_top_prevent_in_admin' => variable_get('back_to_top_prevent_in_admin', TRUE),
-    'back_to_top_button_type' => variable_get('back_to_top_button_type', 'image'),
-    'back_to_top_button_text' => variable_get('back_to_top_button_text', 'Back to top'),
+function back_to_top_page_build(&$page) {
+	$path = drupal_get_path('module', 'back_to_top');
+	$config = \Drupal::config('back_to_top.settings');
+	$settings = $config->get();
+  $button_settings = array(
+    'back_to_top_prevent_on_mobile' => $settings['back_to_top_prevent_on_mobile'],
+    'back_to_top_prevent_in_admin' => $settings['back_to_top_prevent_in_admin'],
+    'back_to_top_button_type' => $settings['back_to_top_button_type'],
+    'back_to_top_button_text' => $settings['back_to_top_button_text'],
   );
-  if (variable_get('back_to_top_prevent_on_mobile', 'TRUE') && (is_mobile())) {
+  if ($settings['back_to_top_prevent_on_mobile'] && (is_mobile())) {
     return FALSE;
   }
-  if (variable_get('back_to_top_prevent_in_admin', 'TRUE') && (is_adminpage())) {
+  if ($settings['back_to_top_prevent_in_admin'] && (is_adminpage())) {
     return FALSE;
   }
-  if (variable_get('back_to_top_prevent_in_front', 'TRUE') && (drupal_is_front_page())) {
+  if ($settings['back_to_top_prevent_in_front'] && (drupal_is_front_page())) {
     return FALSE;
   }
-  drupal_add_library('system', 'effects');
-  $settings['#attached']['library'][] = array('system', 'ui');
   
-  drupal_add_js(drupal_get_path('module', 'back_to_top') . '/js/back_to_top.js', array('group' => JS_DEFAULT, 'every_page' => TRUE));
-  
-  drupal_add_js(array('back_to_top' => array('back_to_top_button_trigger' => variable_get('back_to_top_button_trigger', 100))), 'setting');
-  
+  $page['#attached']['library'][] = 'core/jquery.ui.core';  
+  $page['#attached']['library'][] = 'core/jquery.ui.effects.core';
+
+	$page['#attached']['js'][$path . '/js/back_to_top.js'] = array('every_page' => TRUE);
+	$page['#attached']['js'][] = array(
+		'type' => 'setting',
+		'data' => array('back_to_top' => array(
+			'back_to_top_button_trigger' => $settings['back_to_top_button_trigger'],
+		)),
+	);
   // Add stylesheet for image or text/css button
-  if ((variable_get('back_to_top_button_type', 'image')) == "text" ) {
-    drupal_add_css(drupal_get_path('module', 'back_to_top') . '/css/back_to_top_text.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+  if (($settings['back_to_top_button_type']) == "text" ) {
+	  $page['#attached']['css'][$path . '/css/back_to_top_text.css'] = array('every_page' => TRUE);
   }
   else {
-    drupal_add_css(drupal_get_path('module', 'back_to_top') . '/css/back_to_top.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+	  $page['#attached']['css'][$path . '/css/back_to_top.css'] = array('every_page' => TRUE);
   }
-  
+
   // Check variables and add placement
-  if ((variable_get('back_to_top_button_place', '1')) == 2 ) {
+  if ($settings['back_to_top_button_place'] == 2 ) {
     $css = "#backtotop { left: 10px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 3 ) {
+  if ($settings['back_to_top_button_place'] == 3 ) {
     $css = "#backtotop { left: 50%; margin-left: -50px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 4 ) {
+  if ($settings['back_to_top_button_place'] == 4 ) {
     $css = "#backtotop { top: 10px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 5 ) {
+  if ($settings['back_to_top_button_place'] == 5 ) {
     $css = "#backtotop { top: 10px; left: 10px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 6 ) {
+  if ($settings['back_to_top_button_place'] == 6 ) {
     $css = "#backtotop { top: 10px; left: 50%; margin-left: -50px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 7 ) {
+  if ($settings['back_to_top_button_place'] == 7 ) {
     $css = "#backtotop { top: 50%; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 8 ) {
+  if ($settings['back_to_top_button_place'] == 8 ) {
     $css = "#backtotop { top: 50%; left: 10px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if ((variable_get('back_to_top_button_place', '1')) == 9 ) {
+  if ($settings['back_to_top_button_place'] == 9 ) {
     $css = "#backtotop { top: 50%; left: 50%; margin-left: -50px; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
   // Check variables and add color from settings - this code could be done a bit nicer
-  if (((variable_get('back_to_top_button_type', 'image')) == "text" ) && ((variable_get('back_to_top_bg_color', '#F7F7F7')) !== '#F7F7F7' )) {
-    $setting = variable_get('back_to_top_bg_color', '#F7F7F7');
+  if (($settings['back_to_top_button_type'] == "text" ) && ($settings['back_to_top_bg_color'] !== '#F7F7F7' )) {
+	  $setting = $settings['back_to_top_bg_color'];
     $css = "#backtotop { background: " . $setting . "; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if (((variable_get('back_to_top_button_type', 'image')) == "text" ) && ((variable_get('back_to_top_border_color', '#CCCCCC')) !== '#CCCCCC' )) {
-    $setting = variable_get('back_to_top_bg_color', '#CCCCCC');
+  if (($settings['back_to_top_button_type'] == "text" ) && ($settings['back_to_top_border_color'] !== '#CCCCCC' )) {
+	  $setting = $settings['back_to_top_bg_color'];
     $css = "#backtotop { border-color: " . $setting . "; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if (((variable_get('back_to_top_button_type', 'image')) == "text" ) && ((variable_get('back_to_top_hover_color', '#EEEEEE')) !== '#EEEEEE' )) {
-    $setting = variable_get('back_to_top_hover_color', '#EEEEEE');
+  if (($settings['back_to_top_button_type'] == "text" ) && ($settings['back_to_top_hover_color'] !== '#EEEEEE' )) {
+	  $setting = $settings['back_to_top_hover_color'];
     $css = "#backtotop:hover { background: " . $setting . "; border-color: " . $setting . "; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
-  if (((variable_get('back_to_top_button_type', 'image')) == "text" ) && ((variable_get('back_to_top_text_color', '#333333')) !== '#333333' )) {
-    $setting = variable_get('back_to_top_text_color', '#333333');
+  if (($settings['back_to_top_button_type'] == "text" ) && ($settings['back_to_top_text_color'] !== '#333333' )) {
+	  $setting = $settings['back_to_top_text_color'];
     $css = "#backtotop { color: " . $setting . "; }";
-    drupal_add_css($css, 'inline');  
+	  $page['#attached']['css'][] = array(
+		  'type' => 'inline',
+		  'data' => $css
+	  );
   }
   // Add settings to js
-  drupal_add_js(array('back_to_top' => $settings), 'setting');
+	$page['#attached']['js'][] = array(
+		'type' => 'setting',
+		'data' => array('back_to_top' => $button_settings),
+	);
 }
 
 /**
@@ -124,7 +171,7 @@ function back_to_top_page_build() {
 function is_mobile() {
 
   // Check for mobile device using Browscap module if it is available.
-  if (module_exists('browscap')) {
+  if ( \Drupal::moduleHandler()->moduleExists('browscap')) {
     $browser = browscap_get_browser();
     if (isset($browser['ismobiledevice']) && $browser['ismobiledevice'] == 1) {
       return TRUE;
@@ -172,17 +219,4 @@ function back_to_top_permission() {
       'description' => t('Access Back to top settings.'),
     ),
   );
-}
-
-/**
- * Implements hook_install()
- * Add default permission for access settings to administrator
- */
-function back_to_top_install() {
-  // rid=3 => administrator
-  user_role_change_permissions(3, 
-    array(
-      'access back_to_top settings' => TRUE,
-     )
-   );
 }
