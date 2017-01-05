@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Back To Top link using JQuery.
- * Requires javascript as enabled
- */
 
 /**
  * Implements hook_page_attachments().
