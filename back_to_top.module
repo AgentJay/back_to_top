@@ -201,6 +201,10 @@ function is_mobile() {
 function is_adminpage() {
   $route = \Drupal::routeMatch()->getRouteObject();
   $is_admin = \Drupal::service('router.admin_context')->isAdminRoute($route);
+
+  // Alter for admin prevent check.
+  \Drupal::moduleHandler()->alter('back_to_top_admin_prevent', $is_admin);
+
   return $is_admin;
 }
 
