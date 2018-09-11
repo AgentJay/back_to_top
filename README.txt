@@ -8,10 +8,10 @@ Back To Top
 There are settings for:
 -----------------------
 
-  * Preventing the button to appear in mobile or touch devices. 
+  * Preventing the button to appear in mobile or touch devices.
   * Choosing between a image och text/css button
   * Placement of the button
-  * Appearence of the text/css button
+  * Appearance of the text/css button
   
 
 Road map
