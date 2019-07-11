@@ -81,7 +81,7 @@ class BackToTopSettingsForm extends ConfigFormBase {
     $form['back_to_top_button_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Button text'),
-      '#description' => $this->('Set the text of the Back To Top button'),
+      '#description' => $this->t('Set the text of the Back To Top button'),
       '#default_value' => $settings['back_to_top_button_text'],
       '#size' => 30,
       '#maxlength' => 30,
